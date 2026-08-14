@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Post</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f9f9f9; }
+        form { background: white; padding: 20px; max-width: 500px; margin: auto; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        input, textarea { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        .btn { background-color: #28a745; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <form id="postForm">
+        <h2>Create a New Blog Post</h2>
+        <input type="text" id="title" placeholder="Blog Title" required>
+        <input type="text" id="author" placeholder="Your Name" required>
+        <textarea id="content" rows="6" placeholder="Write your blog content here..." required></textarea>
+        <button type="submit" class="btn">Publish Post</button>
+        <br><br>
+        <a href="/">Back to Home</a>
+    </form>
+
+    <script>
+        document.getElementById('postForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('title').value;
+            const author = document.getElementById('author').value;
+            const content = document.getElementById('content').value;
+
+            await fetch('/api/posts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, author, content })
+            });
+
+            alert('Post published successfully!');
+            window.location.href = '/';
+        });
+    </script>
+</body>
+</html>

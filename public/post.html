@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Post</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 700px; margin: auto; background-color: #f9f9f9; }
+        .post-box, .comment-box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        input, textarea { width: 100%; padding: 10px; margin: 5px 0 15px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        .btn { background-color: #007bff; color: white; padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; }
+        .comment { border-bottom: 1px solid #eee; padding: 10px 0; }
+    </style>
+</head>
+<body>
+    <div id="postContent" class="post-box">Loading post...</div>
+
+    <div class="comment-box">
+        <h3>Leave a Comment</h3>
+        <input type="text" id="commentUser" placeholder="Your Name" required>
+        <textarea id="commentText" rows="3" placeholder="Write your comment..." required></textarea>
+        <button onclick="addComment()" class="btn">Post Comment</button>
+    </div>
+
+    <br>
+    <a href="/">← Back to Home</a>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const postId = urlParams.get('id');
+
+        async function loadPost() {
+            const res = await fetch(`/api/posts/${postId}`);
+            const post = await res.json();
+
+            let commentsHtml = post.comments.map(c => `
+                <div class="comment">
+                    <strong>${c.user}</strong>: <p style="margin:5px 0 0 0;">${c.text}</p>
+                </div>
+            `).join('') || '<p>No comments yet. Be the first!</p>';
+
+            document.getElementById('postContent').innerHTML = `
+                <h1>${post.title}</h1>
+                <p style="color: #666;">By ${post.author}</p>
+                <hr>
+                <p style="font-size: 1.1em; line-height: 1.6;">${post.content}</p>
+                <h3>Comments (${post.comments.length})</h3>
+                <div>${commentsHtml}</div>
+            `;
+        }
+
+        async function addComment() {
+            const user = document.getElementById('commentUser').value;
+            const text = document.getElementById('commentText').value;
+
+            if(!user || !text) {
+                alert('Please fill in both fields.');
+                return;
+            }
+
+            await fetch(`/api/posts/${postId}/comments`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user, text })
+            });
+
+            document.getElementById('commentUser').value = '';
+            document.getElementById('commentText').value = '';
+            loadPost();
+        }
+
+        loadPost();
+    </script>
+</body>
+</html>
